@@ -98,6 +98,9 @@ load_resources (unsigned size, IN gpointer data, gsize datalen,
       if (blocklen > icnslen - (current - bytes))
         return FALSE;
 
+      if (blocklen < sizeof (IcnsBlockHeader))
+        return FALSE;
+
       switch (size)
 	{
 	case 256:
