@@ -252,6 +252,12 @@ GBytes *      gdk_pixbuf_read_pixel_bytes    (const GdkPixbuf  *pixbuf);
 GdkPixbuf *gdk_pixbuf_new (GdkColorspace colorspace, gboolean has_alpha, int bits_per_sample,
 			   int width, int height);
 
+gint gdk_pixbuf_calculate_rowstride (GdkColorspace colorspace,
+				     gboolean      has_alpha,
+				     int           bits_per_sample,
+				     int           width,
+				     int           height);
+
 /* Copy a pixbuf */
 
 GdkPixbuf *gdk_pixbuf_copy (const GdkPixbuf *pixbuf);
