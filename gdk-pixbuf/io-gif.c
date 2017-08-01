@@ -646,9 +646,17 @@ lzw_read_byte (GifContext *context)
 	}
 
 	if (context->lzw_sp > context->lzw_stack) {
-                GifResult ret = {.type = GIF_RESULT_OKAY_BYTE, .byte_value = *--(context->lzw_sp)};
-                return ret;
-	}
+                gint stack_value = *--(context->lzw_sp);
+
+                g_assert (stack_value >= 0);
+
+                if (stack_value == 0) {
+                        return (GifResult) { .type = GIF_RESULT_OKAY };
+                } else {
+                        g_assert (stack_value < 256);
+                        return (GifResult) {.type = GIF_RESULT_OKAY_BYTE, .byte_value = stack_value };
+                }
+        }
 
         GifResult r;
 	while ((r = get_code (context, context->lzw_code_size)).type == GIF_RESULT_OKAY_BYTE) {
@@ -743,8 +751,16 @@ lzw_read_byte (GifContext *context)
 		context->lzw_oldcode = incode;
 
 		if (context->lzw_sp > context->lzw_stack) {
-                        GifResult ret = {.type = GIF_RESULT_OKAY_BYTE, .byte_value = *--(context->lzw_sp)};
-                        return ret;
+                        gint stack_value = *--(context->lzw_sp);
+
+                        g_assert (stack_value >= 0);
+
+                        if (stack_value == 0) {
+                                return (GifResult) { .type = GIF_RESULT_OKAY };
+                        } else {
+                                g_assert (stack_value < 256);
+                                return (GifResult) {.type = GIF_RESULT_OKAY_BYTE, .byte_value = stack_value };
+                        }
 		}
 	}
 	g_assert (r.type != GIF_RESULT_OKAY);
@@ -1044,16 +1060,16 @@ gif_get_lzw (GifContext *context)
 			goto finished_data;
 		}
 		v = read_result.byte_value;
-        result = (GifResult) {.type = GIF_RESULT_OKAY_BYTE, .byte_value = read_result.byte_value};
+                result = (GifResult) {.type = GIF_RESULT_OKAY_BYTE, .byte_value = read_result.byte_value};
 		bound_flag = TRUE;
 
-        g_assert (gdk_pixbuf_get_has_alpha (context->frame->pixbuf));
+                g_assert (gdk_pixbuf_get_has_alpha (context->frame->pixbuf));
 
-        temp = dest + context->draw_ypos * gdk_pixbuf_get_rowstride (context->frame->pixbuf) + context->draw_xpos * 4;
-        *temp = cmap [0][(guchar) v];
-        *(temp+1) = cmap [1][(guchar) v];
-        *(temp+2) = cmap [2][(guchar) v];
-        *(temp+3) = (guchar) ((v == context->gif89.transparent) ? 0 : 255);
+                temp = dest + context->draw_ypos * gdk_pixbuf_get_rowstride (context->frame->pixbuf) + context->draw_xpos * 4;
+                *temp = cmap [0][(guchar) v];
+                *(temp+1) = cmap [1][(guchar) v];
+                *(temp+2) = cmap [2][(guchar) v];
+                *(temp+3) = (guchar) ((v == context->gif89.transparent) ? 0 : 255);
 
 		if (context->prepare_func && context->frame_interlace)
 			gif_fill_in_lines (context, dest, read_result.byte_value);
