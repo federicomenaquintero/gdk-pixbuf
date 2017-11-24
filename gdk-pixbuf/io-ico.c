@@ -318,16 +318,16 @@ static void DecodeHeader(guchar *Data, gint Bytes,
 			return;
 		}
 
-		/* We know how many bytes are in the "header" part. */
-		State->HeaderSize = entry->DIBoffset + 40; /* 40 = sizeof(InfoHeader) */
-
-		if (State->HeaderSize < 0) {
+		if (entry->DIBoffset > G_MAXINT - 40) {
 			g_set_error_literal (error,
 			                     GDK_PIXBUF_ERROR,
 			                     GDK_PIXBUF_ERROR_CORRUPT_IMAGE,
 			                     _("Invalid header in icon"));
 			return;
 		}
+
+		/* We know how many bytes are in the "header" part. */
+		State->HeaderSize = entry->DIBoffset + 40;
 
 		if (State->HeaderSize>State->BytesInHeaderBuf) {
 			guchar *tmp=g_try_realloc(State->HeaderBuf,State->HeaderSize);
