@@ -506,8 +506,11 @@ make_available_at_least (TiffContext *context, guint needed)
         need_alloc = context->used + needed;
         if (need_alloc > context->allocated) {
                 guint new_size = 1;
-                while (new_size < need_alloc)
+                while (new_size && (new_size < need_alloc))
                         new_size *= 2;
+
+		if(!(new_size))
+			return FALSE;
 
                 new_buffer = g_try_realloc (context->buffer, new_size);
                 if (new_buffer) {
