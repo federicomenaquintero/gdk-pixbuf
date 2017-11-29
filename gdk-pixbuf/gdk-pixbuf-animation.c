@@ -105,6 +105,13 @@ gdk_pixbuf_animation_init (GdkPixbufAnimation *animation)
 }
 
 static void
+noop_size_notify (gint     *width,
+		  gint     *height,
+		  gpointer  data)
+{
+}
+
+static void
 prepared_notify (GdkPixbuf          *pixbuf,
                  GdkPixbufAnimation *anim,
                  gpointer            user_data)
@@ -115,6 +122,16 @@ prepared_notify (GdkPixbuf          *pixbuf,
                 anim = gdk_pixbuf_non_anim_new (pixbuf);
 
         *((GdkPixbufAnimation **)user_data) = anim;
+}
+
+static void
+noop_updated_notify (GdkPixbuf *pixbuf,
+                     int        x,
+                     int        y,
+                     int        width,
+                     int        height,
+                     gpointer   user_data)
+{
 }
 
 /**
@@ -219,7 +236,7 @@ gdk_pixbuf_animation_new_from_file (const gchar  *filename,
                 animation = NULL;
 		fseek (f, 0, SEEK_SET);
 
-                context = image_module->begin_load (NULL, prepared_notify, NULL, &animation, error);
+                context = image_module->begin_load (noop_size_notify, prepared_notify, noop_updated_notify, &animation, error);
                 if (!context)
                         goto fail_begin_load;
 
