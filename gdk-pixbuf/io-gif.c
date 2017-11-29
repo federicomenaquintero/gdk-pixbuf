@@ -933,10 +933,9 @@ gif_get_lzw (GifContext *context)
                         if (context->animation->height == 0)
                                 context->animation->height = gdk_pixbuf_get_height (context->frame->pixbuf);
 
-                        if (context->prepare_func)
-                                (* context->prepare_func) (context->frame->pixbuf,
-                                                           GDK_PIXBUF_ANIMATION (context->animation),
-                                                           context->user_data);
+                        (* context->prepare_func) (context->frame->pixbuf,
+                                                   GDK_PIXBUF_ANIMATION (context->animation),
+                                                   context->user_data);
                 } else {
                         /* Otherwise init frame with last frame */
                         GList *link;
@@ -1017,7 +1016,7 @@ gif_get_lzw (GifContext *context)
                 *(temp+2) = cmap [2][(guchar) v];
                 *(temp+3) = (guchar) ((v == context->gif89.transparent) ? 0 : 255);
 
-		if (context->prepare_func && context->frame_interlace)
+		if (context->frame_interlace)
 			gif_fill_in_lines (context, dest, v);
 
 		context->draw_xpos++;
@@ -1082,7 +1081,7 @@ gif_get_lzw (GifContext *context)
         if (bound_flag)
                 context->frame->need_recomposite = TRUE;
         
-	if (bound_flag && context->update_func) {
+	if (bound_flag) {
 		if (lower_bound <= upper_bound && first_pass == context->draw_pass) {
                         maybe_update (context,
                                       context->frame->x_offset,
@@ -1242,7 +1241,7 @@ gif_init (GifContext *context)
         context->animation->width = context->width;
         context->animation->height = context->height;
 
-        if (context->size_func) {
+        {
                 gint width, height;
 
                 width = context->width;
@@ -1545,6 +1544,10 @@ gdk_pixbuf__gif_image_begin_load (GdkPixbufModuleSizeFunc size_func,
                                   GError **error)
 {
 	GifContext *context;
+
+        g_assert (size_func != NULL);
+        g_assert (prepare_func != NULL);
+        g_assert (update_func != NULL);
 
 #ifdef IO_GIFDEBUG
 	count = 0;
